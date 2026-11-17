@@ -1,4 +1,3 @@
-HTML
 
 <!DOCTYPE html>
 <html lang="en">
@@ -6,24 +5,26 @@ HTML
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NELSON DIGITAL SERVICES</title>
+
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:Arial,sans-serif;background:#f3f6fb;color:#17243a}
-header{background:#102542;color:white;padding:22px;text-align:center}
+header,footer{background:#102542;color:white;padding:22px;text-align:center}
 header h2{color:#ffbd35;margin:0}
 nav{margin-top:15px}
 nav a{color:white;text-decoration:none;margin:10px}
 .hero{background:#102542;color:white;text-align:center;padding:55px 20px}
-.hero h1{font-size:30px}
 button{background:#ffbd35;color:#17243a;border:0;padding:13px 22px;border-radius:7px;font-weight:bold;cursor:pointer}
 section{padding:30px 18px;text-align:center}
 .container{max-width:850px;margin:auto}
 .card{background:white;padding:22px;margin:14px 0;border-radius:12px;box-shadow:0 3px 12px #0001}
 select,input{width:100%;padding:13px;margin:9px 0;border:1px solid #ccc;border-radius:7px;font-size:16px}
-footer{background:#102542;color:white;padding:25px;text-align:center}
+.price{background:#eaf7ee;padding:15px;border-radius:9px;margin:15px 0}
+.price strong{color:#137b39;font-size:25px}
 .small{color:#68758a;font-size:14px}
 </style>
 </head>
+
 <body>
 
 <header>
@@ -45,14 +46,17 @@ footer{background:#102542;color:white;padding:25px;text-align:center}
 <section id="bundles">
 <div class="container">
 <h2>Our Data Networks</h2>
+
 <div class="card">
 <h3>🟡 MTN Ghana</h3>
 <p>Choose your preferred MTN data package.</p>
 </div>
+
 <div class="card">
 <h3>🔴 Telecel Ghana</h3>
 <p>Choose your preferred Telecel data package.</p>
 </div>
+
 <div class="card">
 <h3>🔵 AT Ghana</h3>
 <p>Choose your preferred AT data package.</p>
@@ -63,35 +67,44 @@ footer{background:#102542;color:white;padding:25px;text-align:center}
 <section id="order">
 <div class="container">
 <div class="card">
+
 <h2>Place Your Data Order</h2>
-<p>Select your network and package.</p>
+<p>Select your network and data package.</p>
 
 <form id="orderForm">
+
 <label for="network">Network</label>
 <select id="network" required>
 <option value="">Select network</option>
-<option>MTN</option>
-<option>Telecel</option>
-<option>AT</option>
+<option value="MTN">MTN</option>
+<option value="Telecel">Telecel</option>
+<option value="AT">AT</option>
 </select>
 
 <label for="bundle">Data bundle</label>
-<select id="bundle" required>
-<option value="">Select data size</option>
-<option>1 GB</option>
-<option>2 GB</option>
-<option>3 GB</option>
-<option>5 GB</option>
-<option>10 GB</option>
-<option>20 GB</option>
+<select id="bundle" required disabled>
+<option value="">Select network first</option>
 </select>
 
+<div class="price">
+<p>Your selling price (including 5% profit)</p>
+<strong id="sellingPrice">GH₵0.00</strong>
+<p class="small">Your final price is calculated automatically.</p>
+</div>
+
 <label for="phone">Receiving phone number</label>
-<input id="phone" type="tel" placeholder="Enter phone number" required>
+<input id="phone" type="tel"
+placeholder="Enter phone number" required>
 
 <button type="submit">Continue with Order</button>
+
 </form>
-<p class="small">Prices and availability must be confirmed before payment.</p>
+
+<p class="small">
+Prices are based on the supplier price list.
+Please confirm availability before payment.
+</p>
+
 </div>
 </div>
 </section>
@@ -110,18 +123,110 @@ footer{background:#102542;color:white;padding:25px;text-align:center}
 </footer>
 
 <script>
-document.getElementById("orderForm").addEventListener("submit",function(e){
-e.preventDefault();
-const network=document.getElementById("network").value;
-const bundle=document.getElementById("bundle").value;
-const phone=document.getElementById("phone").value;
 
-const message="Hello Nelson Digital Services. I want to order "+bundle+
-" of "+network+" data for "+phone+
-". Please confirm the price and payment instructions.";
+// YOUR PROFIT PERCENTAGE
+const PROFIT_PERCENTAGE = 5;
 
-alert(message);
+// SUPPLIER PRICES AND DATA SIZES
+const bundles = {
+ MTN: [
+  {data:"40 MB",cost:1},
+  {data:"520 MB",cost:5},
+  {data:"840 MB",cost:10},
+  {data:"1.42 GB",cost:20},
+  {data:"9.39 GB",cost:100}
+ ],
+
+ Telecel: [
+  {data:"50 MB",cost:1},
+  {data:"557 MB",cost:5},
+  {data:"892 MB",cost:10},
+  {data:"1.67 GB",cost:20},
+  {data:"10 GB",cost:100},
+  {data:"253 GB",cost:400}
+ ],
+
+ AT: [
+  {data:"51 MB",cost:1},
+  {data:"557 MB",cost:5},
+  {data:"891 MB",cost:10},
+  {data:"1.7 GB",cost:20},
+  {data:"10 GB",cost:100},
+  {data:"253.3 GB",cost:400}
+ ]
+};
+
+const network = document.getElementById("network");
+const bundle = document.getElementById("bundle");
+const sellingPrice = document.getElementById("sellingPrice");
+
+function money(amount){
+ return "GH₵" + amount.toFixed(2);
+}
+
+function calculatePrice(){
+ const selected = bundle.value;
+ const items = bundles[network.value] || [];
+ const item = items.find(b => String(b.cost) === selected);
+
+ if(!item){
+  sellingPrice.textContent = "GH₵0.00";
+  return;
+ }
+
+ const price = item.cost * (1 + PROFIT_PERCENTAGE / 100);
+ sellingPrice.textContent = money(price);
+}
+
+network.addEventListener("change",function(){
+
+ bundle.innerHTML = '<option value="">Select data size</option>';
+
+ const items = bundles[network.value] || [];
+
+ items.forEach(function(item){
+  const option = document.createElement("option");
+  option.value = item.cost;
+  option.textContent = item.data + " - " + money(item.cost * 1.05);
+  bundle.appendChild(option);
+ });
+
+ bundle.disabled = items.length === 0;
+ calculatePrice();
 });
+
+bundle.addEventListener("change",calculatePrice);
+
+document.getElementById("orderForm").addEventListener("submit",function(e){
+
+ e.preventDefault();
+
+ const selectedNetwork = network.value;
+ const selectedBundle = bundle.value;
+ const phone = document.getElementById("phone").value.trim();
+
+ const item = bundles[selectedNetwork].find(
+  b => String(b.cost) === selectedBundle
+ );
+
+ if(!item){
+  alert("Please select a valid data bundle.");
+  return;
+ }
+
+ const finalPrice = item.cost * 1.05;
+
+ const message =
+ "Hello Nelson Digital Services. I want to order " +
+ item.data + " of " + selectedNetwork +
+ " data for " + phone +
+ ". Total price: " + money(finalPrice) +
+ ". Please confirm availability and payment instructions.";
+
+ alert(message);
+
+});
+
 </script>
 
 </body>
