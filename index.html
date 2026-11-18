@@ -187,7 +187,7 @@ network.addEventListener("change",function(){
  items.forEach(function(item){
   const option = document.createElement("option");
   option.value = item.cost;
-  option.textContent = item.data + " - " + money(item.cost * 1.05);
+  option.textContent = item.data + " - " + money(item.cost * (1 + PROFIT_PERCENTAGE / 100));
   bundle.appendChild(option);
  });
 
