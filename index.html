@@ -214,7 +214,7 @@ document.getElementById("orderForm").addEventListener("submit",function(e){
   return;
  }
 
- const finalPrice = item.cost * 1.05;
+ const finalPrice = item.cost *(1+ PROFIT_PERCENTAGE/100);
 
  const message =
  "Hello Nelson Digital Services. I want to order " +
